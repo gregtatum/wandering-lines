@@ -1,0 +1,17 @@
+{
+  "name": "lines",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "budo index.js --serve assets/build/bundle.js --live --verbose | garnish",
+    "build": "browserify index.js -d -g [uglifyify -x .js] | exorcist assets/build/bundle.js.map > assets/build/bundle.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@tatumcreative/on-tap": "^1.1.0",
+    "rbush": "^1.4.2",
+    "rtree": "^1.4.2"
+  }
+}
