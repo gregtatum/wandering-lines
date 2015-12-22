@@ -13,5 +13,10 @@
     "@tatumcreative/on-tap": "^1.1.0",
     "rbush": "^1.4.2",
     "rtree": "^1.4.2"
+  },
+  "devDependencies": {
+    "@tatumcreative/random": "^1.1.3",
+    "lerp": "^1.0.3",
+    "simplex-noise": "^2.2.0"
   }
 }

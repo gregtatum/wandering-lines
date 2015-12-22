@@ -30,21 +30,18 @@ function _drawPoints( ctx, config, points ) {
 
 function _drawLines( ctx, config, lines ) {
 	
-	ctx.lineWidth = config.lineWidth * devicePixelRatio
 	ctx.strokeStyle = config.lineColor
-	
-	ctx.beginPath()
 	
 	lines.forEach(function( line ) {
 		
+		ctx.lineWidth = (10 - line.generation) / 10 * config.lineWidth * devicePixelRatio
 		ctx.beginPath()
 		ctx.moveTo( line[0], line[1] )
 		ctx.lineTo( line[2], line[3] )
 		ctx.stroke()
+		ctx.closePath()
 	})
 	
-	ctx.stroke()
-	ctx.closePath()
 }
 
 function _prepCanvasAndGetCtx() {
@@ -62,8 +59,17 @@ function _prepCanvasAndGetCtx() {
 	return canvas.getContext('2d')
 }
 
-module.exports = function setupDraw( config, current ) {
+module.exports = function setupDraw( current ) {
 
+	var config = {
+		pointSize : 2,
+		pointColor : "#fff",
+		lineWidth : 4,
+		lineColor : "#ddd",
+		boundingBoxWidth : 1,
+		boundingBoxColor : "rgba(255,0,0,0.15)",
+	}
+	
 	var ctx = _prepCanvasAndGetCtx()
 	
 	function draw() {
@@ -74,9 +80,9 @@ module.exports = function setupDraw( config, current ) {
 			window.innerHeight * devicePixelRatio
 		)
 	
-		_drawBoundingBoxes( ctx, config, current.lines )
+		// _drawBoundingBoxes( ctx, config, current.lines )
 		_drawLines( ctx, config, current.lines )
-		_drawPoints( ctx, config, current.points )
+		// _drawPoints( ctx, config, current.points )
 	}
 	
 	window.addEventListener('resize', draw, false)
