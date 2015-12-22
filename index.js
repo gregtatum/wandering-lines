@@ -68,7 +68,7 @@ function _newLine( current, config, x, y, generation, now ) {
 	var theta = noise * TAU
 	
 	var newX = x + Math.cos( theta ) * config.lineLength
-	var newY = y + Math.sin( theta ) * config.lineLength
+	var newY = y + Math.sin( theta ) * config.lineLength 
 
 	var newBounds = _lineToBounds([ x, y, newX, newY ])
 	var neighbors = current.tree.search( newBounds )
@@ -115,11 +115,13 @@ function _createMargin( config, current ) {
 		Lerp( centerX, x2, 0.5 ),
 		Lerp( centerY, y2, 0.5 ),
 	]
+	
+	current.center = [centerX, centerY]
 }
 
 function _updateSmooth( current, config ) {
 	
-	var now = Date.now()
+	current.now += 16
 	
 	for( var i=0; i < config.activeLines; i++ ) {
 		
@@ -131,12 +133,18 @@ function _updateSmooth( current, config ) {
 			y = bounds.line[3]
 			generation = bounds.generation
 		} else {
-			x = config.random( current.bounds[0], current.bounds[2] )
-			y = config.random( current.bounds[1], current.bounds[3] )
 			generation = Math.log(current.generation++)
+			current.logGeneration = 1 + current.logGeneration
+			var x1 = config.random( current.bounds[0], current.bounds[2] )
+			var y1 = config.random( current.bounds[1], current.bounds[3] )
+			var x2 = current.center[0] + Math.cos( current.now * 0.001 ) * config.random(1,2) * current.logGeneration
+			var y2 = current.center[1] + Math.sin( current.now * 0.001 ) * config.random(1,2) * current.logGeneration
+			
+			x = Lerp( x1, x2, config.generationStrategy )
+			y = Lerp( y1, y2, config.generationStrategy )
 		}
 		
-		current.active[i] = _newLine( current, config, x, y, generation, now )
+		current.active[i] = _newLine( current, config, x, y, generation, current.now )
 	}
 }
 
@@ -148,6 +156,7 @@ function init() {
 	
 	var seed = window.location.hash || String(Math.random())
 	var random = Random( seed )
+
 	var simplex = new Simplex( random )
 	var simplex3 = simplex.noise3D.bind(simplex)
 	
@@ -156,11 +165,10 @@ function init() {
 		activeLines : 10,
 		random : random,
 		simplex3 : simplex3,
-		initialCount : 100,
-		maxAngle : Math.PI * 0.2,
 		lineLength : 5,
 		simplexScale : 0.001,
-		simplexDepthScale : 0.0001,
+		simplexDepthScale : 0.00001,
+		generationStrategy : random()
 	}
 	
 	var current = {
@@ -168,8 +176,11 @@ function init() {
 		active : [],
 		points : [],
 		lines : [],
+		center : null,
 		bounds : null,
 		generation : 0,
+		logGeneration : 0,
+		now : 0,
 	}
 	
 	_createMargin( config, current )
