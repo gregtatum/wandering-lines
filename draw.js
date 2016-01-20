@@ -1,89 +1,103 @@
 var TAU = Math.PI * 2
 
-function _drawBoundingBoxes( ctx, config, lines ) {
-
-	ctx.lineWidth = config.boundingBoxWidth * devicePixelRatio
-	ctx.strokeStyle = config.boundingBoxColor
-	
-	lines.forEach(function( line ) {
-		
-		var x = line[0] < line[2] ? line[0] : line[2]
-		var y = line[1] < line[3] ? line[1] : line[3]
-		var w = Math.abs( line[0] - line[2] )
-		var h = Math.abs( line[1] - line[3] )
-		ctx.strokeRect( x, y, w, h )
-	})
-}
-
-function _drawPoints( ctx, config, points ) {
-	var size = config.pointSize * devicePixelRatio
-	var halfSize = config.pointSize / 2 * devicePixelRatio
-	
-	ctx.fillStyle = config.pointColor
-	points.forEach(function( pt ) {
-		
-		ctx.beginPath()
-		ctx.arc( pt[0],	pt[1], config.pointSize, 0, TAU )
-		ctx.fill()
-	})
-}
-
-function _drawLines( ctx, config, lines ) {
-	
+function _drawLines( ctx, config, plot, lines ) {
 	ctx.strokeStyle = config.lineColor
+	ctx.lineCap = 'round'
 	
 	lines.forEach(function( line ) {
-		
-		ctx.lineWidth = (10 - line.generation) / 10 * config.lineWidth * devicePixelRatio
+		ctx.lineWidth = plot.line(
+			(10 - line.generation) / 10 * config.lineWidth
+		)
 		ctx.beginPath()
-		ctx.moveTo( line[0], line[1] )
-		ctx.lineTo( line[2], line[3] )
+		ctx.moveTo(
+			plot.x(line[0], line[1]),
+			plot.y(line[0], line[1])
+		)
+		ctx.lineTo(
+			plot.x(line[2], line[3]),
+			plot.y(line[2], line[3])
+		)
 		ctx.stroke()
 		ctx.closePath()
 	})
-	
 }
 
-function _prepCanvasAndGetCtx() {
-	
-	var canvas = document.querySelector('canvas')
+function _prepCanvasAndGetCtx(canvas) {
 	
 	function resize() {
 		canvas.width = window.innerWidth * devicePixelRatio
 		canvas.height = window.innerHeight * devicePixelRatio
 	}
-	
-	window.addEventListener('resize', resize, false)
-	resize()
+	resize(), window.addEventListener('resize', resize, false)
 	
 	return canvas.getContext('2d')
 }
 
-module.exports = function setupDraw( current ) {
+function _setupPlotting(config, current, canvas) {
+	// [-1,1] range to approximately [0,canvas.size]
+	function resize() {
+		current.ratio = canvas.width / canvas.height
+		
+		if( current.ratio < 1 ) {
+			current.width = canvas.width
+			current.height = canvas.height * current.ratio
+		} else {
+			current.ratio = 1 / current.ratio
+			current.width = canvas.width * current.ratio
+			current.height = canvas.height
+		}
+		
+		current.offsetX = (canvas.width - current.width) / 2
+		current.offsetY = (canvas.height - current.height) / 2
+		
+		current.size = (
+			Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height)
+			/ config.baseScreenDiagonal
+		)
+	}
+	resize(), window.addEventListener('resize', resize, false)
+	
+	var cos = Math.cos(config.rotation)
+	var sin = Math.sin(config.rotation)
+	
+	return {
+		x : function (x, y) {
+			x -= 0.5; y -= 0.5
+			var xp = x*cos - y*sin + 0.5
+			return current.offsetX + xp * current.width
+		},
+		y : function (x, y) {
+			x -= 0.5; y -= 0.5
+			var yp = x*sin + y*cos + 0.5
+			return current.offsetY + yp * current.height
+		},
+		line : function(n) {
+			return n * current.size
+		}
+	}
+}
+
+module.exports = function setupDraw( graph ) {
 
 	var config = {
-		pointSize : 2,
-		pointColor : "#fff",
-		lineWidth : 4,
+		baseScreenDiagonal : 1000,
+		lineWidth : 2,
 		lineColor : "#ddd",
-		boundingBoxWidth : 1,
-		boundingBoxColor : "rgba(255,0,0,0.15)",
+		rotation : Math.PI / 4
+	}
+	var current = {
+		ratio : 1,
+		width : 0,
+		height : 0,
 	}
 	
-	var ctx = _prepCanvasAndGetCtx()
+	var canvas = document.querySelector('canvas')
+	var ctx = _prepCanvasAndGetCtx(canvas)
+	var plot = _setupPlotting(config, current, canvas)
 	
 	function draw(redrawAll) {
-		
-		// ctx.clearRect(
-		// 	0, 0,
-		// 	window.innerWidth * devicePixelRatio,
-		// 	window.innerHeight * devicePixelRatio
-		// )
-		// _drawBoundingBoxes( ctx, config, current.lines )
-		// _drawPoints( ctx, config, current.points )
-	
-		var lines = redrawAll ? current.lines : current.newLines
-		_drawLines( ctx, config, lines )
+		var lines = redrawAll ? graph.lines : graph.newLines
+		_drawLines( ctx, config, plot, lines )
 	}
 	
 	window.addEventListener('resize', draw.bind(null, true), false)

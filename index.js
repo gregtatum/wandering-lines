@@ -12,7 +12,6 @@ function _cutOutIntersections( neighbors, bounds, points ) {
 	var lineEnd
 	var lastDistance = Infinity
 	
-	
 	var a = bounds.line
 	
 	neighbors.forEach(function(neighbor) {
@@ -90,21 +89,16 @@ function _newLine( current, config, x, y, generation, now ) {
 
 function _createMargin( config, current ) {
 	
-	var w = window.innerWidth * config.margin * devicePixelRatio
-	var h = window.innerHeight * config.margin * devicePixelRatio
+	var centerX = 0.5
+	var centerY = 0.5
 	
-	var centerX = window.innerWidth * 0.5 * devicePixelRatio
-	var centerY = window.innerHeight * 0.5 * devicePixelRatio
-	
-	var size = Math.min( w, h ) * 0.5
+	var size = config.margin * 0.5
 	
 	var x1 = centerX - size
 	var x2 = centerX + size
 	var y1 = centerY - size
 	var y2 = centerY + size
 	
-	console.table([[x1,y1,x2,y2]])
-	console.table([[x1/2,y1/2,x2/2,y2/2]])
 	current.tree.insert( _lineToBounds([x1,y1,x2,y1]) )
 	current.tree.insert( _lineToBounds([x2,y1,x2,y2]) )
 	current.tree.insert( _lineToBounds([x2,y2,x1,y2]) )
@@ -118,10 +112,9 @@ function _createMargin( config, current ) {
 	]
 }
 
-function _updateSmooth( current, config ) {
+function _updateLines( current, config ) {
 	
-	var now = Date.now()
-	
+	current.iteration++
 	current.newLines.length = 0
 	
 	for( var i=0; i < config.activeLines; i++ ) {
@@ -139,12 +132,8 @@ function _updateSmooth( current, config ) {
 			generation = Math.log(current.generation++)
 		}
 		
-		current.active[i] = _newLine( current, config, x, y, generation, now )
+		current.active[i] = _newLine( current, config, x, y, generation, current.iteration )
 	}
-}
-
-function originX() {
-	window.innerWidth
 }
 
 function init() {
@@ -159,11 +148,10 @@ function init() {
 		activeLines : 10,
 		random : random,
 		simplex3 : simplex3,
-		initialCount : 100,
 		maxAngle : Math.PI * 0.2,
-		lineLength : 5,
+		lineLength : 0.004,
 		simplexScale : 0.001,
-		simplexDepthScale : 0.0001,
+		simplexDepthScale : 0.001,
 	}
 	
 	var current = {
@@ -174,6 +162,7 @@ function init() {
 		newLines : [],
 		bounds : null,
 		generation : 0,
+		iteration : 0,
 	}
 	
 	_createMargin( config, current )
@@ -181,12 +170,15 @@ function init() {
 	var draw = Draw( current )
 	
 	function loop() {
-		_updateSmooth( current, config )
+		_updateLines( current, config )
 		draw()
 		requestAnimationFrame( loop )
 	}
-	loop()
+	requestAnimationFrame(loop)
 	
+	window.onhashchange = function () {
+		location.reload()
+	}
 }
 
 init()
