@@ -72,19 +72,20 @@ module.exports = function setupDraw( current ) {
 	
 	var ctx = _prepCanvasAndGetCtx()
 	
-	function draw() {
+	function draw(redrawAll) {
 		
-		ctx.clearRect(
-			0, 0,
-			window.innerWidth * devicePixelRatio,
-			window.innerHeight * devicePixelRatio
-		)
-	
+		// ctx.clearRect(
+		// 	0, 0,
+		// 	window.innerWidth * devicePixelRatio,
+		// 	window.innerHeight * devicePixelRatio
+		// )
 		// _drawBoundingBoxes( ctx, config, current.lines )
-		_drawLines( ctx, config, current.lines )
 		// _drawPoints( ctx, config, current.points )
+	
+		var lines = redrawAll ? current.lines : current.newLines
+		_drawLines( ctx, config, lines )
 	}
 	
-	window.addEventListener('resize', draw, false)
+	window.addEventListener('resize', draw.bind(null, true), false)
 	return draw
 }

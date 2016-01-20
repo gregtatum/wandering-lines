@@ -81,6 +81,7 @@ function _newLine( current, config, x, y, generation, now ) {
 	newBounds.line.generation = generation
 	current.tree.insert( newBounds )
 	current.lines.push( newBounds.line )
+	current.newLines.push( newBounds.line )
 	
 	if( !cutBounds ) {
 		return newBounds
@@ -120,6 +121,8 @@ function _createMargin( config, current ) {
 function _updateSmooth( current, config ) {
 	
 	var now = Date.now()
+	
+	current.newLines.length = 0
 	
 	for( var i=0; i < config.activeLines; i++ ) {
 		
@@ -168,6 +171,7 @@ function init() {
 		active : [],
 		points : [],
 		lines : [],
+		newLines : [],
 		bounds : null,
 		generation : 0,
 	}
