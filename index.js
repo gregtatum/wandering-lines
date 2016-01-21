@@ -1,4 +1,4 @@
-var Rbrush       = require('rbush')
+var Rbush       = require('rbush')
 var OnTap        = require('@tatumcreative/on-tap')
 var Random       = require('@tatumcreative/random')
 var Intersection = require('./intersection')
@@ -7,7 +7,7 @@ var Simplex      = require('simplex-noise')
 var TAU          = Math.PI * 2
 var Lerp         = require('lerp')
 
-function _cutOutIntersections( neighbors, bounds, points ) {
+function _cutOutIntersections( neighbors, bounds ) {
 	
 	var lineEnd
 	var lastDistance = Infinity
@@ -35,7 +35,6 @@ function _cutOutIntersections( neighbors, bounds, points ) {
 	})
 	
 	if( lineEnd ) {
-		// points.push( lineEnd )
 		return _lineToBounds([ a[0], a[1], lineEnd[0], lineEnd[1] ])
 	}
 	
@@ -72,7 +71,7 @@ function _newLine( current, config, x, y, generation, now ) {
 	var newBounds = _lineToBounds([ x, y, newX, newY ])
 	var neighbors = current.tree.search( newBounds )
 			
-	var cutBounds = _cutOutIntersections( neighbors, newBounds, current.points )
+	var cutBounds = _cutOutIntersections( neighbors, newBounds )
 	
 	if( cutBounds ) {
 		newBounds = cutBounds
@@ -87,7 +86,7 @@ function _newLine( current, config, x, y, generation, now ) {
 	}
 }
 
-function _createMargin( config, current ) {
+function _createStageBoundary( config, current ) {
 	
 	var centerX = 0.5
 	var centerY = 0.5
@@ -99,12 +98,12 @@ function _createMargin( config, current ) {
 	var y1 = centerY - size
 	var y2 = centerY + size
 	
-	current.tree.insert( _lineToBounds([x1,y1,x2,y1]) )
-	current.tree.insert( _lineToBounds([x2,y1,x2,y2]) )
-	current.tree.insert( _lineToBounds([x2,y2,x1,y2]) )
-	current.tree.insert( _lineToBounds([x1,y2,x1,y2]) )
+	// current.tree.insert( _lineToBounds([x1,y1,x2,y1]) )
+	// current.tree.insert( _lineToBounds([x2,y1,x2,y2]) )
+	// current.tree.insert( _lineToBounds([x2,y2,x1,y2]) )
+	// current.tree.insert( _lineToBounds([x1,y2,x1,y1]) )
 	
-	current.bounds = [
+	current.stageBoundary = [
 		Lerp( centerX, x1, 0.5 ),
 		Lerp( centerY, y1, 0.5 ),
 		Lerp( centerX, x2, 0.5 ),
@@ -127,8 +126,8 @@ function _updateLines( current, config ) {
 			y = bounds.line[3]
 			generation = bounds.generation
 		} else {
-			x = config.random( current.bounds[0], current.bounds[2] )
-			y = config.random( current.bounds[1], current.bounds[3] )
+			x = config.random( current.stageBoundary[0], current.stageBoundary[2] )
+			y = config.random( current.stageBoundary[1], current.stageBoundary[3] )
 			generation = Math.log(current.generation++)
 		}
 		
@@ -149,23 +148,22 @@ function init() {
 		random : random,
 		simplex3 : simplex3,
 		maxAngle : Math.PI * 0.2,
-		lineLength : 0.004,
-		simplexScale : 0.001,
+		lineLength : 0.002,
+		simplexScale : 1,
 		simplexDepthScale : 0.001,
 	}
 	
 	var current = {
-		tree : Rbrush(9),
+		tree : Rbush(9),
 		active : [],
-		points : [],
 		lines : [],
 		newLines : [],
-		bounds : null,
+		stageBoundary : null,
 		generation : 0,
 		iteration : 0,
 	}
 	
-	_createMargin( config, current )
+	_createStageBoundary( config, current )
 	
 	var draw = Draw( current )
 	
