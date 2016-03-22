@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "budo index.js --serve assets/build/bundle.js --live --verbose | garnish",
-    "build": "browserify index.js -d -g [uglifyify -x .js] | exorcist assets/build/bundle.js.map > assets/build/bundle.js"
+    "dev:1": "budo 1/index.js:bundle.js --dir 1 --live --verbose ",
+    "dev:2": "budo 2/index.js:bundle.js --dir 2 --live --verbose ",
+    "dev:3": "budo 3/index.js:bundle.js --dir 3 --live --verbose ",
+    "build:1": "browserify 1/index.js -d -g [uglifyify -x .js] | exorcist 1/bundle.js.map > 1/bundle.js"
   },
   "author": "",
   "license": "ISC",
@@ -16,7 +18,9 @@
   },
   "devDependencies": {
     "@tatumcreative/random": "^1.1.3",
+    "budo": "^8.0.2",
     "exorcist": "^0.4.0",
+    "garnish": "^5.0.1",
     "lerp": "^1.0.3",
     "simplex-noise": "^2.2.0",
     "uglifyify": "^3.0.1"
