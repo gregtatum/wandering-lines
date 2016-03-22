@@ -63,7 +63,7 @@ function _newLine( current, config, x, y, prevTheta, generation, now ) {
 		now * config.simplexDepthScale
 	)
 
-	var theta = prevTheta + noise * config.turnSpeed - config.turnSpeed * 0.5
+	var theta = prevTheta - (noise - noise * 0.5) * config.turnSpeed
 
 	var newX = x + Math.cos( theta ) * config.lineLength
 	var newY = y + Math.sin( theta ) * config.lineLength
@@ -187,7 +187,6 @@ function _startBranch( current, config, line ) {
 	return bounds
 }
 
-
 function init() {
 
 	var seed = window.location.hash.substr(1) || String(Math.random()).split('.')[1]
@@ -199,16 +198,15 @@ function init() {
 
 	var config = {
 		margin: 1.5,
-		maxLines : 20,
+		maxLines : 200,
 		random : random,
 		simplex3 : simplex3,
-		maxAngle : Math.PI * 0.2,
 		lineLength : 0.002,
 		simplexScale : 1,
 		simplexDepthScale : 0.0001,
-		nubSize : 0.0001,
+		nubSize : 0.001,
 		chanceToBranch : 0.1,
-		turnSpeed : Math.PI * 0.1
+		turnSpeed : Math.PI * 0.01
 	}
 
 	var current = {
