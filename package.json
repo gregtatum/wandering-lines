@@ -12,11 +12,10 @@
     "build:3": "browserify 3/index.js -d -g [uglifyify -x .js] | exorcist 3/bundle.js.map > 3/bundle.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "GPL",
   "dependencies": {
     "@tatumcreative/on-tap": "^1.1.0",
-    "rbush": "^1.4.2",
-    "rtree": "^1.4.2"
+    "rbush": "^1.4.2"
   },
   "devDependencies": {
     "@tatumcreative/random": "^1.1.3",
