@@ -7,7 +7,9 @@
     "dev:1": "budo 1/index.js:bundle.js --dir 1 --live --verbose ",
     "dev:2": "budo 2/index.js:bundle.js --dir 2 --live --verbose ",
     "dev:3": "budo 3/index.js:bundle.js --dir 3 --live --verbose ",
-    "build:1": "browserify 1/index.js -d -g [uglifyify -x .js] | exorcist 1/bundle.js.map > 1/bundle.js"
+    "build:1": "browserify 1/index.js -d -g [uglifyify -x .js] | exorcist 1/bundle.js.map > 1/bundle.js",
+    "build:2": "browserify 2/index.js -d -g [uglifyify -x .js] | exorcist 2/bundle.js.map > 2/bundle.js",
+    "build:3": "browserify 3/index.js -d -g [uglifyify -x .js] | exorcist 3/bundle.js.map > 3/bundle.js"
   },
   "author": "",
   "license": "ISC",
