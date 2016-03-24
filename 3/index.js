@@ -1,10 +1,10 @@
 var Rbush        = require('rbush')
-var OnTap        = require('@tatumcreative/on-tap')
+var Simplex      = require('simplex-noise')
+var Lerp         = require('lerp')
 var Random       = require('@tatumcreative/random')
 var Intersection = require('../lib/intersection')
 var Draw         = require('../lib/draw')
-var Simplex      = require('simplex-noise')
-var Lerp         = require('lerp')
+var Shortcuts    = require('../lib/shortcuts')
 var TAU          = Math.PI * 2
 
 function _cutOutIntersections( neighbors, bounds ) {
@@ -194,6 +194,7 @@ function init() {
 	var simplex = new Simplex( random )
 	var simplex3 = simplex.noise3D.bind(simplex)
 
+	Shortcuts(seed)
 	console.log('current seed', seed)
 
 	var config = {
